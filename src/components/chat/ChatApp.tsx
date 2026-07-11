@@ -3,14 +3,22 @@ import { LoginScreen } from "./LoginScreen";
 import { Sidebar } from "./Sidebar";
 import { ChatWindow } from "./ChatWindow";
 import { useChat } from "@/hooks/useChat";
-import { NotificationBanner } from "./NotificationBanner";
+import { NotificationBanner } from "./NotificationBanner.tsx";
+import { useBackendWarmup } from "@/hooks/useBackendWarmup";
+import { BackendWarmupBanner } from "./BackendWarmupBanner";
 
 export function ChatApp() {
   const chat = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const warmup = useBackendWarmup();
 
   if (!chat.username) {
-    return <LoginScreen />;
+    return (
+      <LoginScreen
+        showWarmupMessage={warmup.showWarmupMessage}
+        warmupFailed={warmup.warmupFailed}
+      />
+    );
   }
 
   return (
@@ -27,10 +35,13 @@ export function ChatApp() {
         loading={chat.loadingHistory}
         connected={chat.connected}
         notificationBanner={
-          <NotificationBanner
-            supported={chat.notificationSupported}
-            permission={chat.notificationPermission}
-          />
+          <>
+            {warmup.showWarmupMessage && <BackendWarmupBanner warmupFailed={warmup.warmupFailed} />}
+            <NotificationBanner
+              supported={chat.notificationSupported}
+              permission={chat.notificationPermission}
+            />
+          </>
         }
         typingUser={chat.typingUser}
         onSend={chat.send}

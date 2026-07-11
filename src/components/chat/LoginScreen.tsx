@@ -2,7 +2,14 @@ import { useState, type FormEvent } from "react";
 import { setUsername } from "@/lib/session";
 import { MessageCircle } from "lucide-react";
 
-export function LoginScreen() {
+import { BackendWarmupBanner } from "./BackendWarmupBanner";
+
+type LoginScreenProps = {
+  showWarmupMessage?: boolean;
+  warmupFailed?: boolean;
+};
+
+export function LoginScreen({ showWarmupMessage = false, warmupFailed = false }: LoginScreenProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -24,6 +31,7 @@ export function LoginScreen() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,var(--accent-glow),transparent_55%),radial-gradient(circle_at_80%_90%,var(--primary-glow),transparent_50%)] opacity-70" />
       <div className="relative w-full max-w-md">
+        {showWarmupMessage && <BackendWarmupBanner warmupFailed={warmupFailed} />}
         <div className="rounded-3xl border border-border/60 bg-card/80 p-8 shadow-elegant backdrop-blur-xl">
           <div className="mb-6 flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-primary text-primary-foreground shadow-glow">

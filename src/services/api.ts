@@ -48,6 +48,16 @@ export function getApiUrl() {
   return requireApiUrl();
 }
 
+export async function warmBackend(): Promise<void> {
+  const response = await fetch(`${requireApiUrl()}/health`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to warm backend");
+  }
+}
+
 export function toChatMessage(message: BackendMessage): ChatMessage {
   const createdAt = new Date(message.timestamp).getTime();
   return {
