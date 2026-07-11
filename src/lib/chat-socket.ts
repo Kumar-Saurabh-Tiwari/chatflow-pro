@@ -113,15 +113,24 @@ function makeMockSocket(): ChatSocket {
       users.delete(me);
       emit("disconnect", null);
     },
-    send(text) {
+    send({ id, text }) {
       const msg: ChatMessage = {
-        id: crypto.randomUUID(),
+        id,
         username: me,
         text,
         createdAt: Date.now(),
       };
-      // Echo back after the network "hop"
+      // Echo back after the network "hop" — same id dedupes optimistic entry
       setTimeout(() => emit("message", msg), 60);
+    },
+    edit(id, text) {
+      setTimeout(
+        () => emit("message:update", { id, text, editedAt: Date.now() }),
+        60,
+      );
+    },
+    remove(id) {
+      setTimeout(() => emit("message:delete", { id }), 60);
     },
     typing() {
       // no-op for self in mock
