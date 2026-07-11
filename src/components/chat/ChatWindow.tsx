@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { format, isSameDay } from "date-fns";
 import { Menu, ArrowDown } from "lucide-react";
 import { MessageBubble } from "./MessageBubble";
@@ -12,6 +12,7 @@ interface ChatWindowProps {
   messages: ChatMessage[];
   loading: boolean;
   connected: boolean;
+  notificationBanner?: ReactNode;
   typingUser: string | null;
   onSend: (text: string) => void;
   onTyping: () => void;
@@ -27,6 +28,7 @@ export function ChatWindow({
   messages,
   loading,
   connected,
+  notificationBanner,
   typingUser,
   onSend,
   onTyping,
@@ -88,6 +90,7 @@ export function ChatWindow({
       </header>
 
       <ConnectionBanner connected={connected} />
+      {notificationBanner}
 
       <div
         ref={scrollRef}

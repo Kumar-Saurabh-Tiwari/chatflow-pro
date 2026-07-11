@@ -3,12 +3,15 @@ import { LoginScreen } from "./LoginScreen";
 import { Sidebar } from "./Sidebar";
 import { ChatWindow } from "./ChatWindow";
 import { useChat } from "@/hooks/useChat";
+import { NotificationBanner } from "./NotificationBanner";
 
 export function ChatApp() {
   const chat = useChat();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  if (!chat.username) return <LoginScreen />;
+  if (!chat.username) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
@@ -23,6 +26,12 @@ export function ChatApp() {
         messages={chat.messages}
         loading={chat.loadingHistory}
         connected={chat.connected}
+        notificationBanner={
+          <NotificationBanner
+            supported={chat.notificationSupported}
+            permission={chat.notificationPermission}
+          />
+        }
         typingUser={chat.typingUser}
         onSend={chat.send}
         onTyping={chat.notifyTyping}

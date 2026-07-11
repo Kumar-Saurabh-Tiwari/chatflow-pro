@@ -69,6 +69,9 @@ export function LoginScreen() {
           <p className="mt-6 text-center text-xs text-muted-foreground">
             You'll be greeted by a few friendly bots so it doesn't feel lonely.
           </p>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Browser notifications are requested automatically after you enter the chat.
+          </p>
         </div>
       </div>
     </div>

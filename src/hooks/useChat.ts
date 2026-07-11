@@ -5,6 +5,13 @@ import {
   type ChatUser,
   getChatSocket,
 } from "@/lib/chat-socket";
+import {
+  getNotificationPermissionState,
+  getNotificationSupport,
+  requestNotificationPermission,
+  showChatNotification,
+  type NotificationPermissionState,
+} from "@/lib/browser-notifications";
 import { fetchMessages, toChatMessage, toChatUsers, type BackendMessage } from "@/services/api";
 import { getUsername, subscribeUsername } from "@/lib/session";
 
@@ -25,8 +32,15 @@ export function useChat() {
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [typingUser, setTypingUser] = useState<string | null>(null);
+  const [notificationSupported, setNotificationSupported] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermissionState>(
+    "unsupported",
+  );
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingUsersRef = useRef<Set<string>>(new Set());
+  const notificationSupportedRef = useRef(false);
+  const notificationPermissionRef = useRef<NotificationPermissionState>("unsupported");
+  const permissionRequestedRef = useRef(false);
 
   const history = useQuery({
     queryKey: MESSAGES_KEY,
@@ -92,6 +106,32 @@ export function useChat() {
     },
   });
 
+  useEffect(() => {
+    const supported = getNotificationSupport();
+    setNotificationSupported(supported);
+    notificationSupportedRef.current = supported;
+
+    if (!supported) {
+      setNotificationPermission("unsupported");
+      notificationPermissionRef.current = "unsupported";
+      return;
+    }
+
+    const currentPermission = getNotificationPermissionState();
+    setNotificationPermission(currentPermission);
+    notificationPermissionRef.current = currentPermission;
+
+    if (permissionRequestedRef.current) {
+      return;
+    }
+
+    permissionRequestedRef.current = true;
+    void requestNotificationPermission().then((permission) => {
+      setNotificationPermission(permission);
+      notificationPermissionRef.current = permission;
+    });
+  }, []);
+
   // Wire socket lifecycle to the active username.
   useEffect(() => {
     if (!username) return;
@@ -101,7 +141,19 @@ export function useChat() {
     const offDisconnect = socket.on("disconnect", () => setConnected(false));
     const offUsers = socket.on<string[]>("users:online", (list) => setUsers(toChatUsers(list)));
     const offMessageReceived = socket.on<BackendMessage>("message:received", (msg) => {
-      mergeMessage(toChatMessage(msg));
+      const chatMessage = toChatMessage(msg);
+      mergeMessage(chatMessage);
+
+      if (
+        notificationSupportedRef.current &&
+        notificationPermissionRef.current === "granted" &&
+        (document.hidden || chatMessage.username !== username)
+      ) {
+        showChatNotification({
+          title: chatMessage.username,
+          body: chatMessage.text,
+        });
+      }
     });
     const offMessageSent = socket.on<BackendMessage>("message:sent", (msg) => {
       mergeMessage(toChatMessage(msg));
@@ -172,6 +224,8 @@ export function useChat() {
     connected,
     users,
     typingUser,
+    notificationSupported,
+    notificationPermission,
     send,
     editMessage,
     deleteMessage,
