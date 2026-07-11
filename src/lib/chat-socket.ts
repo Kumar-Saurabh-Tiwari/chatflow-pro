@@ -9,6 +9,8 @@ export type ChatMessage = {
   username: string;
   text: string;
   createdAt: number;
+  editedAt?: number;
+  deleted?: boolean;
 };
 
 export type ChatUser = {
@@ -20,7 +22,9 @@ export interface ChatSocket {
   connected: boolean;
   connect: (username: string) => void;
   disconnect: () => void;
-  send: (text: string) => void;
+  send: (msg: { id: string; text: string }) => void;
+  edit: (id: string, text: string) => void;
+  remove: (id: string) => void;
   typing: () => void;
   on: <T = unknown>(event: string, cb: (payload: T) => void) => () => void;
 }
@@ -109,15 +113,24 @@ function makeMockSocket(): ChatSocket {
       users.delete(me);
       emit("disconnect", null);
     },
-    send(text) {
+    send({ id, text }) {
       const msg: ChatMessage = {
-        id: crypto.randomUUID(),
+        id,
         username: me,
         text,
         createdAt: Date.now(),
       };
-      // Echo back after the network "hop"
+      // Echo back after the network "hop" — same id dedupes optimistic entry
       setTimeout(() => emit("message", msg), 60);
+    },
+    edit(id, text) {
+      setTimeout(
+        () => emit("message:update", { id, text, editedAt: Date.now() }),
+        60,
+      );
+    },
+    remove(id) {
+      setTimeout(() => emit("message:delete", { id }), 60);
     },
     typing() {
       // no-op for self in mock
@@ -146,8 +159,14 @@ function makeRealSocket(url: string): ChatSocket {
       socket?.disconnect();
       socket = null;
     },
-    send(text) {
-      socket?.emit("message", { text });
+    send({ id, text }) {
+      socket?.emit("message", { id, text });
+    },
+    edit(id, text) {
+      socket?.emit("message:update", { id, text });
+    },
+    remove(id) {
+      socket?.emit("message:delete", { id });
     },
     typing() {
       socket?.emit("typing");

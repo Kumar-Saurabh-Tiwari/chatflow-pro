@@ -15,6 +15,8 @@ interface ChatWindowProps {
   typingUser: string | null;
   onSend: (text: string) => void;
   onTyping: () => void;
+  onEdit: (id: string, text: string) => void;
+  onDelete: (id: string) => void;
   onOpenSidebar: () => void;
   onlineCount: number;
 }
@@ -27,6 +29,8 @@ export function ChatWindow({
   typingUser,
   onSend,
   onTyping,
+  onEdit,
+  onDelete,
   onOpenSidebar,
   onlineCount,
 }: ChatWindowProps) {
@@ -105,7 +109,13 @@ export function ChatWindow({
                     <span className="h-px flex-1 bg-border" />
                   </div>
                 )}
-                <MessageBubble message={m} isMe={m.username === me} showMeta={changeAuthor} />
+                <MessageBubble
+                  message={m}
+                  isMe={m.username === me}
+                  showMeta={changeAuthor}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
               </div>
             );
           })}

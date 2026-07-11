@@ -26,6 +26,8 @@ export function ChatApp() {
         typingUser={chat.typingUser}
         onSend={chat.send}
         onTyping={chat.notifyTyping}
+        onEdit={chat.editMessage}
+        onDelete={chat.deleteMessage}
         onOpenSidebar={() => setSidebarOpen(true)}
         onlineCount={chat.users.filter((u) => u.online).length}
       />
