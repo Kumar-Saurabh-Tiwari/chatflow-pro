@@ -9,6 +9,8 @@ export type ChatMessage = {
   username: string;
   text: string;
   createdAt: number;
+  editedAt?: number;
+  deleted?: boolean;
 };
 
 export type ChatUser = {
@@ -20,7 +22,9 @@ export interface ChatSocket {
   connected: boolean;
   connect: (username: string) => void;
   disconnect: () => void;
-  send: (text: string) => void;
+  send: (msg: { id: string; text: string }) => void;
+  edit: (id: string, text: string) => void;
+  remove: (id: string) => void;
   typing: () => void;
   on: <T = unknown>(event: string, cb: (payload: T) => void) => () => void;
 }
