@@ -54,6 +54,19 @@ export function useChat() {
       if (typingClearRef.current) clearTimeout(typingClearRef.current);
       typingClearRef.current = setTimeout(() => setTypingUser(null), 2500);
     });
+    const offUpdate = socket.on<{ id: string; text: string; editedAt: number }>(
+      "message:update",
+      ({ id, text, editedAt }) => {
+        queryClient.setQueryData<ChatMessage[]>(MESSAGES_KEY, (prev = []) =>
+          prev.map((m) => (m.id === id ? { ...m, text, editedAt } : m)),
+        );
+      },
+    );
+    const offDelete = socket.on<{ id: string }>("message:delete", ({ id }) => {
+      queryClient.setQueryData<ChatMessage[]>(MESSAGES_KEY, (prev = []) =>
+        prev.map((m) => (m.id === id ? { ...m, deleted: true, text: "" } : m)),
+      );
+    });
 
     socket.connect(username);
 
@@ -63,6 +76,8 @@ export function useChat() {
       offUsers();
       offMessage();
       offTyping();
+      offUpdate();
+      offDelete();
       socket.disconnect();
       if (typingClearRef.current) clearTimeout(typingClearRef.current);
     };
@@ -71,15 +86,33 @@ export function useChat() {
   const send = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || !username) return;
-    // Optimistic append
+    const id = crypto.randomUUID();
+    // Optimistic append with the SAME id the socket will echo, so the
+    // incoming "message" event dedupes instead of appearing twice.
     const optimistic: ChatMessage = {
-      id: crypto.randomUUID(),
+      id,
       username,
       text: trimmed,
       createdAt: Date.now(),
     };
     queryClient.setQueryData<ChatMessage[]>(MESSAGES_KEY, (prev = []) => [...prev, optimistic]);
-    getChatSocket().send(trimmed);
+    getChatSocket().send({ id, text: trimmed });
+  };
+
+  const editMessage = (id: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    queryClient.setQueryData<ChatMessage[]>(MESSAGES_KEY, (prev = []) =>
+      prev.map((m) => (m.id === id ? { ...m, text: trimmed, editedAt: Date.now() } : m)),
+    );
+    getChatSocket().edit(id, trimmed);
+  };
+
+  const deleteMessage = (id: string) => {
+    queryClient.setQueryData<ChatMessage[]>(MESSAGES_KEY, (prev = []) =>
+      prev.map((m) => (m.id === id ? { ...m, deleted: true, text: "" } : m)),
+    );
+    getChatSocket().remove(id);
   };
 
   const notifyTyping = () => getChatSocket().typing();
@@ -92,6 +125,8 @@ export function useChat() {
     users,
     typingUser,
     send,
+    editMessage,
+    deleteMessage,
     notifyTyping,
   };
 }
