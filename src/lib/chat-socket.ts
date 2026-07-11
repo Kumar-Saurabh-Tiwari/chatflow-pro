@@ -159,8 +159,14 @@ function makeRealSocket(url: string): ChatSocket {
       socket?.disconnect();
       socket = null;
     },
-    send(text) {
-      socket?.emit("message", { text });
+    send({ id, text }) {
+      socket?.emit("message", { id, text });
+    },
+    edit(id, text) {
+      socket?.emit("message:update", { id, text });
+    },
+    remove(id) {
+      socket?.emit("message:delete", { id });
     },
     typing() {
       socket?.emit("typing");
