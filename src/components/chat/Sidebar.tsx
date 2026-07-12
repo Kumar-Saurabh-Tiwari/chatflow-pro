@@ -26,19 +26,19 @@ export function Sidebar({ me, users, open, onClose }: SidebarProps) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-sidebar-border px-5 py-4">
+        <div className="flex items-center justify-between border-b border-white/15 px-5 py-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow ring-1 ring-white/30">
               <MessageCircle className="h-5 w-5" />
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-sm font-semibold">Pulse Chat</h1>
-              <p className="truncate text-xs text-muted-foreground">#general</p>
+              <p className="truncate text-xs text-foreground/70">#general</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-2 text-muted-foreground hover:bg-sidebar-accent md:hidden"
+            className="rounded-md p-2 text-foreground/70 hover:bg-white/20 md:hidden"
             aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
