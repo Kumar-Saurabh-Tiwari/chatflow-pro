@@ -46,19 +46,19 @@ export function Sidebar({ me, users, open, onClose }: SidebarProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="px-2 pb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <div className="px-2 pb-2 text-xs font-semibold uppercase tracking-wider text-foreground/60">
             Online — {online.length}
           </div>
           <ul className="space-y-1">
             {online.map((u) => (
               <li key={u.username}>
-                <div className="flex items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-sidebar-accent">
+                <div className="flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-white/15 hover:scale-[1.01]">
                   <Avatar name={u.username} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">
                       {u.username}
                       {u.username === me && (
-                        <span className="ml-1 text-xs font-normal text-muted-foreground">
+                        <span className="ml-1 text-xs font-normal text-foreground/60">
                           (you)
                         </span>
                       )}
@@ -74,16 +74,16 @@ export function Sidebar({ me, users, open, onClose }: SidebarProps) {
           </ul>
         </div>
 
-        <div className="border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-3 rounded-lg bg-sidebar-accent/60 px-3 py-2">
+        <div className="border-t border-white/15 p-3">
+          <div className="flex items-center gap-3 rounded-xl border border-white/20 bg-white/15 px-3 py-2 backdrop-blur-md dark:bg-white/5">
             <Avatar name={me} />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold">{me}</p>
-              <p className="text-xs text-muted-foreground">Signed in</p>
+              <p className="text-xs text-foreground/60">Signed in</p>
             </div>
             <button
               onClick={() => setUsername(null)}
-              className="rounded-md p-2 text-muted-foreground transition hover:bg-sidebar hover:text-foreground"
+              className="rounded-md p-2 text-foreground/70 transition hover:bg-white/20 hover:text-foreground"
               aria-label="Sign out"
               title="Sign out"
             >
