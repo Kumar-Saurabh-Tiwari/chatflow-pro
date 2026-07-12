@@ -1,9 +1,9 @@
-import darkBg from "@/assets/Dark-BG.mp4.asset.json";
-import lightBg from "@/assets/Light-BG.mp4.asset.json";
+import darkBg from "/assets/Dark-BG.mp4";
+import lightBg from "/assets/Light-BG.mp4";
 import type { Theme } from "@/lib/theme";
 
 export function VideoBackground({ theme }: { theme: Theme }) {
-  const src = theme === "dark" ? darkBg.url : lightBg.url;
+  const src = theme === "dark" ? darkBg : lightBg;
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <video
